@@ -1,0 +1,12 @@
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'cais/zephyr_7b_r2d2' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'thu-coai/Mistral-7B-Instruct-v0.2-safeunlearning' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'thu-coai/vicuna-7b-v1.5-safeunlearning' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'lapisrocks/Llama-3-8B-Instruct-TAR-Refusal' --tokenizer "PawanKrd/Meta-Llama-3-8B-Instruct" --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'GraySwanAI/Llama-3-8B-Instruct-RR' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'Unispac/Llama2-7B-Chat-Augmented' --tokenizer 'meta-llama/Llama-2-7b-chat-hf' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'LLM-LAT/robust-llama3-8b-instruct' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'thkim0305/RepBend_Mistral_7B' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'thkim0305/RepBend_Llama3_8B' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model "GraySwanAI/Mistral-7B-Instruct-RR" --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'Unispac/Gemma-2-9B-IT-With-Deeper-Safety-Alignment' --tokenizer 'google/gemma-2-9b-it' --evalJudge sjf --csvP ./benignRes.csv
+CUDA_VISIBLE_DEVICES="4" python benignEval.py --model 'Youliang/llama3-8b-instruct-lora-derta-100step' --tokenizer "PawanKrd/Meta-Llama-3-8B-Instruct" --evalJudge sjf --csvP ./benignRes.csv
