@@ -14,7 +14,7 @@ from strong_reject import evaluate
 
 import myJudge
 import myUtil
-from SCAV import classifier_manager, embedding_manager, perturbation, instructions
+from SCAV import classifier_manager, embedding_manager, perturbation
 
 
 def register_hooks(model, perturbations: list, layerIdxs):

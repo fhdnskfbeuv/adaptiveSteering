@@ -5,9 +5,8 @@ import gc
 import torch
 from datasets import disable_caching
 from peft import PeftModel
-from strong_reject import load_datasets
 from transformers import AutoProcessor
-
+import os
 import angular
 import baselines
 import myUtil
@@ -82,7 +81,7 @@ if __name__ == '__main__':
 				angularManager.prepare(
 					modelN,
 					insts['train'][0], insts['train'][1],
-					AutoProcessor.from_pretrained(args.tokenizer, token='os.getenv('HF_TOKEN', default=None)')
+					AutoProcessor.from_pretrained(args.tokenizer, token=os.getenv('HF_TOKEN', default=None))
 				)
 			model, processor, config = myUtil.loadModel(modelN, args.tokenizer)
 			hooks = angularManager.addHook(model if not isinstance(model, PeftModel) else model.base_model.model, 180)

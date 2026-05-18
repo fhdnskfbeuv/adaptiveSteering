@@ -6,7 +6,7 @@ import numpy as np
 from matplotlib.backends.backend_pdf import PdfPages
 import os
 from typing import List, Optional, Tuple
-
+import matplotlib
 import myUtil
 
 
@@ -147,10 +147,7 @@ def plot_multi_line_subplots_with_legend(
 	)
 	totalSubFig = ceil(num_lines / 3) * 3
 	# Handle single subplot case
-	if num_lines == 1:
-		axes = [axes]
-	else:
-		axes = axes.flatten().tolist()
+	axes = axes.flatten().tolist()
 
 	# Calculate shared y-axis range if needed
 	# if share_y:
@@ -339,155 +336,8 @@ def save_legend_as_pdf(
 	# Close legend figure
 	plt.close(fig_legend)
 
-
-def plot_line_with_error_bands_pdf(x_values, y_triplets, labels=None, title="Line Plot with Error Bands",
-								   x_label="X-axis", y_label="Y-axis", output_path="output.pdf",
-								   colors=None, markers=None, linestyles=None,
-								   linewidth=4, alpha=0.3, grid=True, legend_loc='best'):
-	"""
-	Plot line chart with error bands and save as PDF
-
-	Parameters:
-	----------
-	x_values : list
-		X-axis values
-	y_triplets : list of lists
-		Y-axis triplets, each triplet format: [mean, lower_error, upper_error]
-	labels : list, optional
-		Labels for each line
-	title : str, optional
-		Plot title
-	x_label : str, optional
-		X-axis label
-	y_label : str, optional
-		Y-axis label
-	output_path : str, optional
-		Output PDF file path
-	colors : list, optional
-		Line colors
-	markers : list, optional
-		Marker styles
-	linestyles : list, optional
-		Line styles
-	linewidth : int, optional
-		Line width
-	alpha : float, optional
-		Error band transparency (0-1)
-	grid : bool, optional
-		Show grid
-	legend_loc : str, optional
-		Legend location
-
-	Returns:
-	----------
-	fig : matplotlib.figure.Figure
-		Figure object
-	ax : matplotlib.axes.Axes
-		Axes object
-	"""
-
-	# Input validation
-	if not isinstance(x_values, (list, np.ndarray)):
-		raise ValueError("x_values must be a list or array")
-
-	if not isinstance(y_triplets, (list, np.ndarray)):
-		raise ValueError("y_triplets must be a list or array")
-
-	y_data = y_triplets
-
-	n_lines = len(y_data) # Number of lines
-
-	# Set default values
-	if labels is None:
-		labels = [f'Line {i + 1}' for i in range(n_lines)]
-
-	if colors is None:
-		# Use matplotlib default color cycle
-		colors = plt.cm.tab10(np.linspace(0, 1, n_lines))
-
-	if markers is None:
-		markers = ['o', 's', '^', 'D', 'v', '<', '>', 'p', '*', 'h'] * (n_lines // 10 + 1)
-		markers = markers[:n_lines]
-
-	if linestyles is None:
-		linestyles = ['-'] * n_lines
-
-	# Create large figure (2048×2048 pixels, approx 27×27 cm, 300 DPI)
-	fig_width = 2048 / 300  # Convert to inches (300 DPI)
-	fig_height = 2048 / 300
-	fig, ax = plt.subplots(figsize=(fig_width, fig_height), dpi=300)
-
-	# Plot each line with its error band
-	for i in range(n_lines):
-		# Extract data
-		y_mean = y_data[i][:, 0]  # Mean values
-		y_lower_err = y_data[i][:, 1]  # Lower error
-		y_upper_err = y_data[i][:, 2]  # Upper error
-
-		# Calculate error band boundaries
-		y_lower = y_lower_err
-		y_upper = y_upper_err
-
-		# Plot error band (shaded area)
-		ax.fill_between(x_values[i], y_lower, y_upper,
-						color=colors[i], alpha=alpha,
-						label=f'{labels[i]}' if n_lines == 1 else None)
-
-		# Plot center line (mean line)
-		ax.plot(x_values[i], y_mean, color=colors[i], marker=markers[i],
-				linestyle=linestyles[i], linewidth=linewidth, markersize=0,
-				label=labels[i] if n_lines > 1 else None)
-		ax.plot(x_values[i], y_lower, color=colors[i], marker=markers[i],
-				linestyle='--', linewidth=max(1, linewidth // 2), markersize=0)
-		ax.plot(x_values[i], y_upper, color=colors[i], marker=markers[i],
-				linestyle='--', linewidth=max(1, linewidth // 2), markersize=0)
-
-	# Set plot style with larger fonts
-	ax.set_xlabel(x_label, fontsize=24, fontweight='bold')
-	ax.set_ylabel(y_label, fontsize=24, fontweight='bold')
-	ax.set_title(title, fontsize=28, fontweight='bold', pad=20)
-
-	# Set tick label sizes
-	ax.tick_params(axis='both', which='major', labelsize=20)
-	ax.tick_params(axis='both', which='minor', labelsize=16)
-
-	# Set grid
-	if grid:
-		ax.grid(True, alpha=0.3, linestyle='--', linewidth=1.5)
-
-	# Add legend
-	if labels:
-		handles, labels_legend = ax.get_legend_handles_labels()
-		# If only one line with error band label, filter duplicates
-		if n_lines == 1 and len(handles) > 1:
-			# Keep only the line legend
-			ax.legend(handles=[handles[1]], labels=[labels[0]],
-					  loc=legend_loc, fontsize=15, framealpha=0.9)
-		else:
-			ax.legend(loc=legend_loc, fontsize=15, framealpha=0.9)
-
-	# Auto-adjust y-axis range considering error bands
-	# y_min_all = np.min(y_data[:, :, 0] - y_data[:, :, 1])
-	# y_max_all = np.max(y_data[:, :, 0] + y_data[:, :, 2])
-	# y_margin = (y_max_all - y_min_all) * 0.1
-	# ax.set_ylim(y_min_all - y_margin, y_max_all + y_margin)
-
-	# Use tight_layout to ensure all elements fit
-	plt.tight_layout(pad=3.0)
-
-	# Save as PDF
-	with PdfPages(output_path) as pdf:
-		pdf.savefig(fig, bbox_inches='tight', pad_inches=0.1, dpi=300)
-
-	print(f"Plot saved as: {os.path.abspath(output_path)}")
-
-	# Display plot
-	plt.show()
-
-	return fig, ax
-
-
 if __name__ == '__main__':
+	matplotlib.rcParams['pdf.fonttype'] = 42
 	os.makedirs('./picture', exist_ok=True)
 	with open(r'./scavACC.json', 'r+') as f:
 		data = json.load(f)
@@ -517,7 +367,7 @@ if __name__ == '__main__':
 
 	xs, ys, labels = [], [], []
 	title = 'Per-layer Norm'
-	for k, v in list(data.items()):
+	for k, v in list(data.items())[-7:]:
 		acc = np.array(v['acc'])  # (TrialNum, LayerNum)
 		meanAcc = np.mean(acc, axis=0)
 		upAcc = np.max(acc, axis=0)

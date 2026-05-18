@@ -8,6 +8,7 @@ import os
 from typing import List, Optional, Tuple
 
 from SCAV import classifier_manager
+import matplotlib
 
 
 def plot_line_with_error_bands_pdf(x_values, y_data, labels=None, title="Line Plot with Error Bands",
@@ -264,8 +265,8 @@ def plot_multi_line_subplots_with_legend(
 		ax = axes[i]
 		for j, y_mean in enumerate(y_data_list[i]):
 			# Plot center line (mean line)
-			ax.plot(x_data[i], y_mean, color=colors[j], marker=markers[j],
-					linestyle=linestyles[j], linewidth=linewidth, markersize=0,
+			ax.plot(x_data[i], y_mean, color=colors[i], marker=markers[i],
+					linestyle=linestyles[j], linewidth=linewidth, markersize=linewidth+1,
 					# label=line_names[i]
 					)
 		ax.set_title(titles[i], fontsize=10)
@@ -295,8 +296,8 @@ def plot_multi_line_subplots_with_legend(
 
 		# Set unified y-axis range
 		# if share_y:
-		# ax.set_ylim(y_min, y_max)
-		# ax.set_yticks(np.arange(np.floor(y_min * 10) / 10, np.ceil(y_max * 10) / 10 + 0.01, 0.1))
+		ax.set_ylim(y_min, y_max)
+		ax.set_yticks(np.arange(np.floor(y_min * 10) / 10, np.ceil(y_max * 10) / 10 + 0.01, 0.1))
 
 		# ax.set_yticks(np.arange(np.floor(y_mean.min() * 10) / 10, np.ceil(y_mean.max() * 10) / 10 + 0.01, 0.1))
 		if i % nCol == 0:
@@ -416,6 +417,7 @@ def save_legend_as_pdf(
 
 
 if __name__ == '__main__':
+	matplotlib.rcParams['pdf.fonttype'] = 42
 	models = [
 		["./iterSCAVWeight/cais_zephyr_7b_r2d2/harm[50, 50]_benign[50, 50]/judgesjf_embTypelast_posiall_filterDataTrue_layer[-32, -2]_penaltyl2_gpuLRTrue_reweightFalse_maxIter20_trainL256_pt0.5_softThres[0.05, 0.6]_clfrs.pt"],
 		["./iterSCAVWeight/cais_zephyr_7b_r2d2/harm[50, 50]_benign[50, 50]/judgesjf_embTyperesponse_posiall_filterDataFalse_layer[-32, -2]_penaltyl2_gpuLRTrue_reweightFalse_maxIter20_trainL256_pt0.5_softThres[0.05, 0.6]_clfrs.pt"],

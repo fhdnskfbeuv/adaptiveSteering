@@ -1,4 +1,6 @@
+import copy
 import csv
+import functools
 import gc
 import json
 import os.path
@@ -9,6 +11,8 @@ import torch
 import tqdm
 from colorama import Fore, Style
 from peft import PeftModel
+
+from SCAV import perturbation
 from strong_reject import evaluate, load_datasets
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoProcessor, AutoConfig
 from transformers import pipeline
@@ -18,10 +22,10 @@ from repe import repe_pipeline_registry, WrappedReadingVecModel
 
 customizedChatTemplate = {  # We hope authors of models below provide official jinja-format chat template :(
 	'Youliang/llama3-8b-instruct-lora-derta-100step': """{{ bos_token }}{% for message in messages %}{% if message['role'] == 'user' %}[INST] {{ message['content'] }} [/INST]{% else %}{% endif %}{% endfor %}""",
-	# see https://huggingface.co/Youliang/llama3-8b-instruct-lora-derta-100step. Yet, we must say that this is, in fact, similar to Llama2 and is quite different from Llama3's fromat:( Oh my god! They use Llama3's bos token but use Llama2's format????
+	# Provided in their hf repo. Yet, we must say that this is, in fact, similar to Llama2 and is quite different from Llama3's fromat:( Oh my god! They use Llama3's bos token but use Llama2's format????
 	"vicuna-7b-v1.5": """{% if messages[0]['role'] == 'system' %}{% set loop_messages = messages[1:] %}{% set system_message = messages[0]['content'] %}{% else %}{% set loop_messages = messages %}{% set system_message = 'A chat between a curious user and an artificial intelligence assistant. The assistant gives helpful, detailed, and polite answers to the user\\'s questions.' %}{% endif %}{{ bos_token + system_message }}{% for message in loop_messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if loop.index0 == 0 %}{{ system_message }}{% endif %}{% if message['role'] == 'user' %}{{ ' USER: ' + message['content'].strip() }}{% elif message['role'] == 'assistant' %}{{ ' ASSISTANT: ' + message['content'].strip() + eos_token }}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ ' ASSISTANT:' }}{% endif %}""",
-	# see https://huggingface.co/lmsys/vicuna-7b-v1.5/commit/3321f76e3f527bd14065daf69dad9344000a201d
-	# "vicuna-7b-v1.5": """{% if messages[0]['role'] == 'system' %}{% set system_message = messages[0]['content'] | trim + '\n\n' %}{% set messages = messages[1:] %}{% else %}{% set system_message = '' %}{% endif %}{{ bos_token + system_message }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ 'USER: ' + message['content'] | trim + '\n' }}{% elif message['role'] == 'assistant' %}{{ 'ASSISTANT: ' + message['content'] | trim + eos_token + '\n' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ 'ASSISTANT:' }}{% endif %}"""  # see https://github.com/chujiezheng/chat_templates/blob/main/chat_templates/vicuna.jinja. The difference lie in "\n\n" after USER. Yet, see also https://github.com/thu-coai/SafeUnlearning/blob/47892d0bd7258820ec5a28791534906f5dec48b3/data/ft_full_data/vicuna_format/dev.json#L3. Thus, we adopt the version above
+	#  Provided in their hf repo.
+	# "vicuna-7b-v1.5": """{% if messages[0]['role'] == 'system' %}{% set system_message = messages[0]['content'] | trim + '\n\n' %}{% set messages = messages[1:] %}{% else %}{% set system_message = '' %}{% endif %}{{ bos_token + system_message }}{% for message in messages %}{% if (message['role'] == 'user') != (loop.index0 % 2 == 0) %}{{ raise_exception('Conversation roles must alternate user/assistant/user/assistant/...') }}{% endif %}{% if message['role'] == 'user' %}{{ 'USER: ' + message['content'] | trim + '\n' }}{% elif message['role'] == 'assistant' %}{{ 'ASSISTANT: ' + message['content'] | trim + eos_token + '\n' }}{% endif %}{% endfor %}{% if add_generation_prompt %}{{ 'ASSISTANT:' }}{% endif %}"""
 }
 
 lora2base = {
@@ -337,3 +341,47 @@ def loadEvalData(evalData):
 		print(f'{evalData} not supported')
 		exit(1)
 	return prompts
+
+
+def register_hooks(model, perturbations: list, layerIdxs, posi):
+	retHooks = []
+	
+	def _hook_fn(module, inputs, outputs, layer_idx, perturbs):
+		for ppp in perturbs:
+			outputs = ppp.get_perturbation(outputs, layer_idx, posi=posi)
+		return outputs
+	
+	for i in layerIdxs:
+		baseModel = model.model if not isinstance(model, PeftModel) else model.base_model.model.model
+		if hasattr(baseModel, 'language_model'):
+			baseModel = baseModel.language_model
+		retHooks.append(baseModel.layers[i].register_forward_hook(
+			functools.partial(_hook_fn, layer_idx=i, perturbs=perturbations)
+		))
+	return retHooks
+
+def scavHook(model, clfP, mode, layers, evalPT, posi):
+	allClfr = torch.load(clfP, weights_only=False, map_location='cpu')
+	if mode == 'all':
+		clfr2test = {k: allClfr[k] for k in sorted(allClfr)}
+	elif mode == 'first':
+		clfr2test = {k: allClfr[k] for k in sorted(allClfr)[:1]}
+	elif mode == 'best':
+		clfr2test = {k: allClfr[k] for k in sorted(allClfr, key=lambda k: allClfr[k][0], reverse=True)[:1]}
+	elif mode == 'last':
+		clfr2test = {k: allClfr[k] for k in sorted(allClfr, reverse=True)[:1]}
+	else:
+		clfr2test = None
+	(iterNum, (score, clfrs, negEachLayerProb, posEachLayerProb, usefulEachLayerProb)) = list(clfr2test.items())[0]
+	probType = negEachLayerProb
+	eType = evalPT.split(' ')
+	eType = eType[0]
+	if eType in probType.keys():
+		ept = copy.deepcopy(probType[eType])
+	else:
+		if float(eType) <= 0.5:
+			ept = [probType['min'][i] + float(eType) / 0.5 * (0.5 - probType['min'][i]) for i in range(len(clfrs.classifiers))]  # [min(max(float(eType), probType['min'][i]), posEachLayerProb['max'][i]) for i in range(len(clfrs.classifiers))]
+		else:
+			ept = [0.5 + (float(eType) - 0.5) / 0.5 * (posEachLayerProb['max'][i] - 0.5) for i in range(len(clfrs.classifiers))]  # [min(max(float(eType), probType['min'][i]), posEachLayerProb['max'][i]) for i in range(len(clfrs.classifiers))]
+	pert = perturbation.Perturbation(clfrs, target_probability=ept)
+	return register_hooks(model, [pert], layers, posi), f'Iter{iterNum}, {score}'

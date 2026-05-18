@@ -185,11 +185,11 @@ class SJRubricAPI:
 
 
 def HarmBenchJudge(prompt, response):
-	s = evaluate.harmbench({"forbidden_prompt": [prompt], "response": [response]})['score'][0]
+	s = evaluate.harmbench({"forbidden_prompt": [prompt], "response": [response]}, max_response_length=2048)['score'][0]
 	if math.isnan(s):
 		s = 0.0
 	return s
 
 
 def StrongRejectJudge(prompt, response):
-	return evaluate.strongreject_finetuned({"forbidden_prompt": [prompt], "response": [response]})['score'][0]
+	return evaluate.strongreject_finetuned({"forbidden_prompt": [prompt], "response": [response]}, max_response_length=4096)['score'][0]

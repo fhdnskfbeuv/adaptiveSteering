@@ -1,5 +1,5 @@
 # fortified
-CUDA_VISIBLE_DEVICES="0" python jailbreakGenSCAVIter.py --judge sjf --maxIter 20 --trainL 256 --layer -2 --model 'LLM-LAT/robust-llama3-8b-instruct' --saveDir ./iterSCAVWeight --softThres 0.05 0.6 --gpuLR --evalPT "min" --pt 0.5 --posi all --embType last --val
+CUDA_VISIBLE_DEVICES="3" python jailbreakGenSCAVIter.py --judge sjf --maxIter 20 --trainL 256 --layer -2 --model 'LLM-LAT/robust-llama3-8b-instruct' --saveDir ./iterSCAVWeight --softThres 0.05 0.6 --gpuLR --evalPT "min" --pt 0.5 --posi all --embType last --val
 CUDA_VISIBLE_DEVICES="0" python jailbreakGenSCAVIter.py --judge sjf --maxIter 20 --trainL 256 --layer -2 --model 'Unispac/Llama2-7B-Chat-Augmented' --tokenizer 'meta-llama/Llama-2-7b-chat-hf' --saveDir ./iterSCAVWeight --softThres 0.05 0.6 --gpuLR --evalPT "min" --pt 0.5 --posi all --embType last --val
 CUDA_VISIBLE_DEVICES="0" python jailbreakGenSCAVIter.py --judge sjf --maxIter 20 --trainL 256 --layer -2 --model 'GraySwanAI/Mistral-7B-Instruct-RR' --saveDir ./iterSCAVWeight --softThres 0.05 0.6 --gpuLR --evalPT "min" --pt 0.5 --posi all --embType last --val
 CUDA_VISIBLE_DEVICES="0" python jailbreakGenSCAVIter.py --judge sjf --maxIter 20 --trainL 256 --layer -2 --model 'GraySwanAI/Llama-3-8B-Instruct-RR' --saveDir ./iterSCAVWeight --softThres 0.05 0.6 --gpuLR --evalPT "min" --pt 0.5 --posi all --embType last --val

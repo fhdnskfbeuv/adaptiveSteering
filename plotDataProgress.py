@@ -7,7 +7,7 @@ from typing import List, Tuple, Optional, Union, Dict, Any
 import matplotlib.patches as mpatches
 import seaborn as sns
 from SCAV import classifier_manager
-
+import matplotlib
 
 def plot_line_boxplot(
 	xs, ys, labels, x_label, y_label, save_path, nCols,
@@ -75,6 +75,7 @@ def plot_line_boxplot(
 
 
 if __name__ == '__main__':
+	matplotlib.rcParams['pdf.fonttype'] = 42
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--l', type=str)
 	parser.add_argument('--h', type=str)

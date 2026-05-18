@@ -8,7 +8,7 @@ import os
 from typing import List, Optional, Tuple
 
 from SCAV import classifier_manager
-
+import matplotlib
 
 def plot_line_with_error_bands_pdf(x_values, y_data, labels=None, title="Line Plot with Error Bands",
 								   x_label="X-axis", y_label="Y-axis", output_path="output.pdf",
@@ -416,7 +416,7 @@ def save_legend_as_pdf(
 
 
 if __name__ == '__main__':
-
+	matplotlib.rcParams['pdf.fonttype'] = 42
 	ys = [
 		[np.array([0.453258333, 0.450020283, 0.402870218, 0.373518338][::-1]), np.array([0.2683, 0.346930042, 0.390469134, 0.440846503][::-1])],
 		[np.array([0.817168037, 0.726433833, 0.562878102, 0.222240478][::-1]), np.array([0.177602999, 0.452212532, 0.522432715, 0.597944111][::-1])],

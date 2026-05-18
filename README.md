@@ -4,7 +4,11 @@
 
 Run the command below to install conda environment first:
 ```commandline
-conda env create -f environment.yml
+conda create -n your_env_name python=3.11
+conda activate your_env_name
+pip install -r requirements.txt
+cd ./strong_reject
+pip install -e .
 ```
 
 Then, copy and paste files in ```forTransformerLens``` to ```Your_Anaconda_Path/envs/as/lib/python3.11/site-packages/transformer_lens/```, 
@@ -14,10 +18,11 @@ These replacements are crucial. The former is to make Angular, who depends on tr
 
 In ```*.sh```, you may find ```"model base_url api_key"```. This is for StrongReject's rubric judge, which is powered by commercial LLMs.
 Replace ```"model base_url api_key"``` with LLMs available to you. 
-For example, our results are based on Qwen-Plus: ```"qwen-plus https://dashscope.aliyuncs.com/compatible-mode/v1 sk-xxxxxxxxxxxxxx"```.
-Here, do replace ```sk-xxxxxxxxxxxxxx``` with the API Key you apply in ```https://www.aliyun.com/```.
+For example, our results are based on Qwen-Plus (**In late January 2026, the main branch model of qwen-plus was updated. The SR metric in this paper are based on the previous version of qwen-plus, with the snapshot version being qwen-plus-2025-07-28.**): ```"qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-xxxxxxxxxxxxxx"```.
+Here, do replace ```sk-xxxxxxxxxxxxxx``` with the API Key you apply in ```https://www.aliyun.com/```. Also, specify your HF_TOKEN: ```export HF_TOKEN=hf_xxxxxxx```.
 
-If you do not have times to run Algorithm 1, you can download probes in [Coming soon] and ignore all command running ```jailbreakGenSCAVIter.py```.
+Due to the anonymity constraints during the peer-review process (as anonymous file-sharing websites may be compromised or leak downloader information) and the size limitations for attachments, 
+we are unable to provide the ready-made probes to save the reviewers' time in running Algorithm 1.
 
 ## Main Results
 
@@ -28,7 +33,7 @@ Run commands in ```getAccAndNorm.sh```, and check ```./picture/SCAV_per-layer_Ac
 
 ### Table 1
 
-Run commands in ```iterSCAV.sh``` to acquire probes. 
+Run commands in ```iterSCAV.sh``` to acquire probes in ```./iterSCAVWeight```. 
 Then, run commands in ```evalMy.sh```. Results of our method will be stored in ```myRes_min.csv```.
 To get baselines' results, run commands in ```otherBaseline.sh```, and check ```otherBaselineRes.csv```.
 
@@ -49,7 +54,18 @@ To reproduce results of the first 5 rows in Table 3, run commands in ```otherBas
 To reproduce results of SCAV+AS+DLA+SAT+NA, run commands in ```iterSCAV_full.sh``` to train probes, 
 run commands in ```evalMy_full.sh```, and check ```myRes_full_min.csv```.
 
+### Figure 4
+
+```commandline
+python plotProgress4.py
+```
+
+
 ## Results in Appendix
+
+### Table 4
+
+Run commands in ```evalMy_threshold.sh```, and check ```myRes_threshold_min.csv```
 
 ### Figure 5
 
@@ -105,4 +121,34 @@ Row 2: myRes_med_min.csv
 Row 3: myRes_response_min.csv
 Row 4: myRes_med_response_min.csv
 ```
+
+### Table 8
+
+Table 8's results partially come from our ongoing work. We do not provide code. However, we can provide corresponding adversarial examples and probes for evaluation. This is sound, since, to prove the adversarial attack capability, the attacker only needs to show the found adversarial examples.
+
+Build a new environment with commands below (remember to switch back before performing experiments above):
+
+```commandline
+conda create -n your_env_name python=3.11
+conda activate your_env_name
+pip install -r table8.txt
+cd ./strong_reject
+pip install -e .
+```
+
+Get ready your "model base_url api_key", and run
+```commandline
+CUDA_VISIBLE_DEVICES="1" python evalMyThink.py --answerOnly --evalData harm --maxL 16384 --model 'Qwen/Qwen3-4B-Thinking-2507' --evalPT "min" --maxL 16384 --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # Qwe3-4B-Think No Attack
+
+CUDA_VISIBLE_DEVICES="1" python evalMyThink.py --answerOnly --evalData harm --maxL 16384 --model 'Qwen/Qwen3-4B-Thinking-2507' --evalPT "min" --maxL 16384 --clfP "./qwen3think.pt" --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # Qwe3-4B-Think Ours
+
+CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --maxL 512 --model 'GraySwanAI/llava-v1.6-mistral-7b-hf-RR' --tokenizer 'llava-hf/llava-v1.6-mistral-7b-hf' --csvP advEvalRes.csv --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # Llava-CB  No Attack
+
+CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --maxL 512 --model 'GraySwanAI/llava-v1.6-mistral-7b-hf-RR' --tokenizer 'llava-hf/llava-v1.6-mistral-7b-hf' --imgP "./cbAdv.png" --csvP advEvalRes.csv --evalJudge "sjf" "hb" "qwen-plus https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # Llava-CB PGD+Ours
+
+CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --answerOnly --maxL 16384 --model 'zai-org/GLM-4.6V-Flash' --csvP advEvalRes.csv --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # GLM No Attack
+
+CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --answerOnly --maxL 16384 --model 'zai-org/GLM-4.6V-Flash' --imgP "./glmAdv.png" --csvP advEvalRes.csv --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # GLM PGD+Ours
+```
+
 

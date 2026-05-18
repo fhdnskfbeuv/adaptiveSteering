@@ -11,7 +11,7 @@ from pipeline.submodules.generate_directions import generate_directions
 from pipeline.submodules.select_direction import select_direction, get_refusal_scores
 from pipeline.utils.hook_utils import add_hooks
 from pipeline.utils.hook_utils import get_activation_addition_input_pre_hook, get_all_direction_ablation_hooks
-from vanillaSCAV.classifier_manager import ClassifierManager
+from vanillaSCAV.classifier_manager import ClassifierManager, betterCM
 from vanillaSCAV.embedding_manager import EmbeddingManager
 from vanillaSCAV.perturbation import Perturbation, AllPerturbation
 from vanillaSCAV.llm_config import cfg as CFG
@@ -120,82 +120,6 @@ class refusalDirection:
 	def getHooks(self):
 		self.ablation_fwd_pre_hooks, self.ablation_fwd_hooks = get_all_direction_ablation_hooks(self.model, self.direction)
 		self.actadd_fwd_pre_hooks, self.actadd_fwd_hooks = [(self.model.model_block_modules[self.layer], get_activation_addition_input_pre_hook(vector=self.direction, coeff=-1.0))], []
-
-	def ablationGen(self, prompts, maxL, doSample, rp=1.0):
-		fullStrs = []
-		completions = []
-		with add_hooks(module_forward_pre_hooks=self.ablation_fwd_pre_hooks, module_forward_hooks=self.ablation_fwd_hooks):
-			for prompt in tqdm.tqdm(prompts, total=len(prompts)):
-				query = [
-					{
-						"role": "user",
-						"content": prompt
-					}
-				]
-				templatedQuery = self.processor.apply_chat_template(query,
-																	tokenize=False,
-																	add_generation_prompt=True)  # Prepare texts for processing
-				# if prefix is not None:
-				# 	templatedQuery += prefix
-				inputs = self.processor(
-					text=[templatedQuery], return_tensors="pt"
-				).to(self.model.model.device)  # Encode texts and images into tensors
-				# if prefix is not None:  # [1, L]
-				# 	inputs['input_ids'] = torch.concat([inputs['input_ids'], prefix.repeat(inputs['input_ids'].shape[0], 1).to(inputs['input_ids'])], dim=1)
-				# 	inputs['attention_mask'] = torch.concat([inputs['attention_mask'], torch.ones((inputs['attention_mask'].shape[0], prefix.shape[1])).to(inputs['attention_mask'])], dim=1)
-				# inputs = {k: v.to('cuda') if hasattr(v, 'to') else v for k, v in batchNoTarget.items()}
-				# Inference: Generation of the output
-				generated_ids = self.model.model.generate(**inputs, max_new_tokens=maxL, do_sample=doSample, repetition_penalty=rp)
-				trimmedIDs = []
-				for i in range(len(generated_ids)):
-					trimmedIDs.append(generated_ids[i][inputs['input_ids'][i].shape[0]:])
-				completeion = self.processor.batch_decode(
-					trimmedIDs, skip_special_tokens=True, clean_up_tokenization_spaces=False
-				)[0]
-				fullStr = self.processor.batch_decode(
-					generated_ids, skip_special_tokens=False, clean_up_tokenization_spaces=False
-				)[0]
-				fullStrs.append(fullStr)
-				completions.append(completeion)
-		return fullStrs, completions
-
-	def actaddGen(self, prompts, maxL, doSample, rp=1.0):
-		fullStrs = []
-		completions = []
-		with add_hooks(module_forward_pre_hooks=self.actadd_fwd_pre_hooks, module_forward_hooks=self.actadd_fwd_hooks):
-			for prompt in tqdm.tqdm(prompts, total=len(prompts)):
-				query = [
-					{
-						"role": "user",
-						"content": prompt
-					}
-				]
-				templatedQuery = self.processor.apply_chat_template(query,
-																	tokenize=False,
-																	add_generation_prompt=True)  # Prepare texts for processing
-				# if prefix is not None:
-				# 	templatedQuery += prefix
-				inputs = self.processor(
-					text=[templatedQuery], return_tensors="pt"
-				).to(self.model.model.device)  # Encode texts and images into tensors
-				# if prefix is not None:  # [1, L]
-				# 	inputs['input_ids'] = torch.concat([inputs['input_ids'], prefix.repeat(inputs['input_ids'].shape[0], 1).to(inputs['input_ids'])], dim=1)
-				# 	inputs['attention_mask'] = torch.concat([inputs['attention_mask'], torch.ones((inputs['attention_mask'].shape[0], prefix.shape[1])).to(inputs['attention_mask'])], dim=1)
-				# inputs = {k: v.to('cuda') if hasattr(v, 'to') else v for k, v in batchNoTarget.items()}
-				# Inference: Generation of the output
-				generated_ids = self.model.model.generate(**inputs, max_new_tokens=maxL, do_sample=doSample, repetition_penalty=rp)
-				trimmedIDs = []
-				for i in range(len(generated_ids)):
-					trimmedIDs.append(generated_ids[i][inputs['input_ids'][i].shape[0]:])
-				completeion = self.processor.batch_decode(
-					trimmedIDs, skip_special_tokens=True, clean_up_tokenization_spaces=False
-				)[0]
-				fullStr = self.processor.batch_decode(
-					generated_ids, skip_special_tokens=False, clean_up_tokenization_spaces=False
-				)[0]
-				fullStrs.append(fullStr)
-				completions.append(completeion)
-		return fullStrs, completions
 
 
 def getMessages(texts, systemPrompt=None):
@@ -385,7 +309,7 @@ class lastAllSCAV:
 		neg_train_embds = self.extract_embds(negTrainPrompts)
 		pos_test_embds = self.extract_embds(posValPrompts)
 		neg_test_embds = self.extract_embds(negValPrompts)
-		clfr = ClassifierManager('')
+		clfr = betterCM('')
 		clfr.fit(pos_train_embds, neg_train_embds, pos_test_embds, neg_test_embds)
 		print('Test Acc:')
 		print(clfr.testacc)
