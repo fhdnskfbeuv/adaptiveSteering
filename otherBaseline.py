@@ -72,16 +72,17 @@ if __name__ == '__main__':
 			if modelN in myUtil.lora2base.keys():
 				model, processor, config = myUtil.loadModel(modelN, args.tokenizer)
 				angularManager.prepare(
-					modelN if modelN not in myUtil.lora2base.keys() else myUtil.lora2base[modelN],
+					modelN.replace('adasteer/', '') if modelN.replace('adasteer/', '') not in myUtil.lora2base.keys() else myUtil.lora2base[modelN.replace('adasteer/', '')],
 					insts['train'][0], insts['train'][1],
 					processor,
 					model.base_model.model
 				)
 			else:
 				angularManager.prepare(
-					modelN,
+					modelN.replace('adasteer/', ''),
 					insts['train'][0], insts['train'][1],
-					AutoProcessor.from_pretrained(args.tokenizer, token=os.getenv('HF_TOKEN', default=None))
+					AutoProcessor.from_pretrained(args.tokenizer, token=os.getenv('HF_TOKEN', default=None)),
+					myUtil.loadModel(modelN, args.tokenizer)[0] if 'adasteer' in modelN.lower() else None
 				)
 			model, processor, config = myUtil.loadModel(modelN, args.tokenizer)
 			hooks = angularManager.addHook(model if not isinstance(model, PeftModel) else model.base_model.model, 180)

@@ -60,20 +60,31 @@ run commands in ```evalMy_full.sh```, and check ```myRes_full_min.csv```.
 python plotProgress4.py
 ```
 
+### Figure 5
 
-## Results in Appendix
+Run commands in ```benignEval.sh```, and compare ```benignRes.csv``` and ```myRes_min.csv```.
 
 ### Table 4
 
+Run commands in ```boostR2D2.sh```, and check ```R2D2Res.csv```
+
+### Figure 6
+
+Run ```plotProgressR2D2.py```, and check ```./picture/iterR2D2.pdf```.
+
+## Results in Appendix
+
+### Table 5
+
 Run commands in ```evalMy_threshold.sh```, and check ```myRes_threshold_min.csv```
 
-### Figure 5
+### Figure 7
 
 ```commandline
-python plotProgress.py
+python plotProgress7.py
 ```
 
-### Figure 6, 7, and 8
+### Figure 8, 9, and 10
 
 ```commandline
 python plotDataProgress.py --l 1.0 --h 1.0
@@ -81,18 +92,7 @@ python plotDataProgress.py --l 0.5 --h 0.5
 python plotDataProgress.py --l 0.0005 --h 0.0005
 ```
 
-### Figure 9
 
-Run commands in ```benignEval.sh```, and compare ```benignRes.csv``` and ```myRes_min.csv```.
-
-
-### Table 5
-
-Run commands in ```boostR2D2.sh```, and check ```R2D2Res.csv```
-
-### Figure 10
-
-Run ```plotProgressR2D2.py```, and check ```./picture/iterR2D2.pdf```.
 
 ### Figure 11
 
@@ -138,17 +138,39 @@ pip install -e .
 
 Get ready your "model base_url api_key", and run
 ```commandline
-CUDA_VISIBLE_DEVICES="1" python evalMyThink.py --answerOnly --evalData harm --maxL 16384 --model 'Qwen/Qwen3-4B-Thinking-2507' --evalPT "min" --maxL 16384 --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # Qwe3-4B-Think No Attack
+CUDA_VISIBLE_DEVICES="1" python evalMyThink.py --answerOnly --evalData harm --maxL 16384 --model 'Qwen/Qwen3-4B-Thinking-2507' --evalPT "min" --maxL 16384 --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "model base_url api_key"  # Qwe3-4B-Think No Attack
 
-CUDA_VISIBLE_DEVICES="1" python evalMyThink.py --answerOnly --evalData harm --maxL 16384 --model 'Qwen/Qwen3-4B-Thinking-2507' --evalPT "min" --maxL 16384 --clfP "./qwen3think.pt" --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # Qwe3-4B-Think Ours
+CUDA_VISIBLE_DEVICES="1" python evalMyThink.py --answerOnly --evalData harm --maxL 16384 --model 'Qwen/Qwen3-4B-Thinking-2507' --evalPT "min" --maxL 16384 --clfP "./qwen3think.pt" --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "model base_url api_key"  # Qwe3-4B-Think Ours
 
-CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --maxL 512 --model 'GraySwanAI/llava-v1.6-mistral-7b-hf-RR' --tokenizer 'llava-hf/llava-v1.6-mistral-7b-hf' --csvP advEvalRes.csv --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # Llava-CB  No Attack
+CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --maxL 512 --model 'GraySwanAI/llava-v1.6-mistral-7b-hf-RR' --tokenizer 'llava-hf/llava-v1.6-mistral-7b-hf' --csvP advEvalRes.csv --evalJudge "sjf" "hb" "model base_url api_key"  # Llava-CB  No Attack
 
-CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --maxL 512 --model 'GraySwanAI/llava-v1.6-mistral-7b-hf-RR' --tokenizer 'llava-hf/llava-v1.6-mistral-7b-hf' --imgP "./cbAdv.png" --csvP advEvalRes.csv --evalJudge "sjf" "hb" "qwen-plus https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # Llava-CB PGD+Ours
+CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --maxL 512 --model 'GraySwanAI/llava-v1.6-mistral-7b-hf-RR' --tokenizer 'llava-hf/llava-v1.6-mistral-7b-hf' --imgP "./cbAdv.png" --csvP advEvalRes.csv --evalJudge "sjf" "hb" "model base_url api_key"  # Llava-CB PGD+Ours
 
-CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --answerOnly --maxL 16384 --model 'zai-org/GLM-4.6V-Flash' --csvP advEvalRes.csv --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # GLM No Attack
+CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --answerOnly --maxL 16384 --model 'zai-org/GLM-4.6V-Flash' --csvP advEvalRes.csv --evalJudge "sjf" "hb" "model base_url api_key"  # GLM No Attack
 
-CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --answerOnly --maxL 16384 --model 'zai-org/GLM-4.6V-Flash' --imgP "./glmAdv.png" --csvP advEvalRes.csv --evalJudge "sjf" "hb" "qwen-plus-2025-07-28 https://dashscope.aliyuncs.com/compatible-mode/v1 sk-f57ee033343e4c36b2a183eaf1e07b8b"  # GLM PGD+Ours
+CUDA_VISIBLE_DEVICES="2" python evalAdv.py --evalData harm --answerOnly --maxL 16384 --model 'zai-org/GLM-4.6V-Flash' --imgP "./glmAdv.png" --csvP advEvalRes.csv --evalJudge "sjf" "hb" "model base_url api_key"  # GLM PGD+Ours
 ```
+
+### Table 9
+
+AdaSteer's implementation is full of strange magical hyper-parameters (even different from those presented in the published paper) and is not compatible. We re-implement it with hook for better compatibility and align the hyper-parameters with the AdaSteer paper (otherwise, the capability of AdaSteer is poor, leading to trivial robustness). To attack AdaSteer with our method, run
+
+```commandline
+CUDA_VISIBLE_DEVICES="4" python jailbreakGenSCAVIter.py --judge sjf --maxIter 20 --trainL 256 --layer -2 --model 'adasteer/meta-
+llama/Llama-3.1-8B-Instruct' --saveDir ./iterSCAVWeight --softThres 0.05 0.6 --gpuLR --evalPT "min" --pt 0.5 --posi all --embType last --val
+
+CUDA_VISIBLE_DEVICES="4" python jailbreakGenSCAVIter.py --judge sjf --maxIter 20 --trainL 256 --layer -2 --model 'adasteer/google/gemma-2-9b-it' --saveDir ./iterSCAVWeight --softThres 0.05 0.6 --gpuLR --evalPT "min" --pt 0.5 --posi all --embType last --val
+
+CUDA_VISIBLE_DEVICES="4" python jailbreakGenSCAVIter.py --judge sjf --maxIter 20 --trainL 256 --layer -2 --model 'adasteer/Qwen/Qwen2.5-7B-Instruct' --saveDir ./iterSCAVWeight --softThres 0.05 0.6 --gpuLR --evalPT "min" --pt 0.5 --posi all --embType last --val
+
+CUDA_VISIBLE_DEVICES="4" python evalMy.py --evalData harm --model 'adasteer/meta-llama/Llama-3.1-8B-Instruct' --evalPT "min" --clfP "./iterSCAVWeight/adasteer_meta-llama_Llama-3.1-8B-Instruct/harm[50, 50]_benign[50, 50]/judgesjf_embTypelast_posiall_filterDataFalse_layer[-32, -2]_penaltyl2_gpuLRTrue_reweightFalse_maxIter20_trainL256_pt0.5_softThres[0.05, 0.6]_clfrs.pt" --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "model base_url api_key"
+
+CUDA_VISIBLE_DEVICES="4" python evalMy.py --evalData harm --model 'adasteer/google/gemma-2-9b-it' --evalPT "min" --clfP "./iterSCAVWeight/adasteer_google_gemma-2-9b-it/harm[50, 50]_benign[50, 50]/judgesjf_embTypelast_posiall_filterDataFalse_layer[-42, -2]_penaltyl2_gpuLRTrue_reweightFalse_maxIter20_trainL256_pt0.5_softThres[0.05, 0.6]_clfrs.pt" --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "model base_url api_key"
+
+CUDA_VISIBLE_DEVICES="4" python evalMy.py --evalData harm --model 'adasteer/Qwen/Qwen2.5-7B-Instruct' --evalPT "min" --clfP "./iterSCAVWeight/adasteer_Qwen_Qwen2.5-7B-Instruct/harm[50, 50]_benign[50, 50]/judgesjf_embTypelast_posiall_filterDataFalse_layer[-28, -2]_penaltyl2_gpuLRTrue_reweightFalse_maxIter20_trainL256_pt0.5_softThres[0.05, 0.6]_clfrs.pt" --csvP myRes.csv --evalClfr 'best' --layer -2 --posi 'all' --evalJudge "sjf" "hb" "model base_url api_key"
+
+```
+
+To attack AdaSteer with baselines, run commands in ```adaSteerBaseline.sh```
 
 

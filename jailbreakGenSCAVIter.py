@@ -46,6 +46,10 @@ def getEmb(model, messages: list[list[dict]], processor, maxL, prefix=None, embT
 			inputs['input_ids'] = torch.concat([inputs['input_ids'], prefix.repeat(inputs['input_ids'].shape[0], 1).to(inputs['input_ids'])], dim=1)
 			inputs['attention_mask'] = torch.concat([inputs['attention_mask'], torch.ones((inputs['attention_mask'].shape[0], prefix.shape[1])).to(inputs['attention_mask'])], dim=1)
 		# Inference: Generation of the output
+		if hasattr(model, 'adaHooks'):
+			model.adaHooks[1].reset()
+			model.generate(**inputs, max_new_tokens=2, do_sample=False)
+			model.adaHooks[1].isRecord = False
 		output = model.generate(**inputs, max_new_tokens=maxL,
 								output_hidden_states=True,
 								return_dict_in_generate=True, do_sample=False)

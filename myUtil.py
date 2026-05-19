@@ -16,6 +16,7 @@ from SCAV import perturbation
 from strong_reject import evaluate, load_datasets
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoProcessor, AutoConfig
 from transformers import pipeline
+import adaUtil
 
 import myJudge
 from repe import repe_pipeline_registry, WrappedReadingVecModel
@@ -161,6 +162,9 @@ def init_rep_control(
 
 def loadModel(modelN, tokenizerN):
 	tryNum = 10
+	doAda = True if 'adasteer/' in modelN else False
+	modelN = modelN.replace('adasteer/', '')
+	tokenizerN = tokenizerN.replace('adasteer/', '')
 	while tryNum > 0:
 		try:
 			tryNum -= 1
@@ -176,6 +180,17 @@ def loadModel(modelN, tokenizerN):
 															 attn_implementation="sdpa")
 				config = AutoConfig.from_pretrained(modelN, token=os.getenv('HF_TOKEN', default=None))
 			processor = AutoProcessor.from_pretrained(tokenizerN, token=os.getenv('HF_TOKEN', default=None))
+			if doAda:
+				print('Adasteer!')
+				adaName = 'What?'
+				if 'llama' in modelN.lower():
+					adaName = 'llama'
+				elif 'gemma' in modelN.lower():
+					adaName = 'gemma'
+				elif 'qwen' in modelN.lower():
+					adaName = 'qwen'
+				adaHooks = adaUtil.register_ada_hooks(model, adaName)
+				model.adaHooks = adaHooks
 			for k in customizedChatTemplate.keys():
 				if k in modelN:
 					processor.chat_template = customizedChatTemplate[k]
@@ -255,6 +270,10 @@ def easyGen(model, processor, text: str, maxL=128, prefix=None, doSample=False):
 	if prefix is not None:  # [1, L]
 		inputs['input_ids'] = torch.concat([inputs['input_ids'], prefix.repeat(inputs['input_ids'].shape[0], 1).to(inputs['input_ids'])], dim=1)
 		inputs['attention_mask'] = torch.concat([inputs['attention_mask'], torch.ones((inputs['attention_mask'].shape[0], prefix.shape[1])).to(inputs['attention_mask'])], dim=1)
+	if hasattr(model, 'adaHooks'):
+		model.adaHooks[1].reset()
+		model.generate(**inputs, max_new_tokens=2, do_sample=False)
+		model.adaHooks[1].isRecord = False
 	generated_ids = model.generate(**inputs, max_new_tokens=maxL, do_sample=doSample)
 	trimmedIDs = []
 	for i in range(len(generated_ids)):
