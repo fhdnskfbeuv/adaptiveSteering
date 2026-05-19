@@ -11,7 +11,6 @@ from pipeline.utils.utils import get_orthogonalized_matrix
 from pipeline.model_utils.model_base import ModelBase
 
 # Gemma chat template is based on
-# - Official Gemma documentation: https://ai.google.dev/gemma/docs/formatting
 
 GEMMA_CHAT_TEMPLATE = """<start_of_turn>user
 {instruction}<end_of_turn>

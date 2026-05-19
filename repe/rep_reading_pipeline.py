@@ -78,6 +78,11 @@ class RepReadingPipeline(Pipeline):
                 decoder_start_token = [self.tokenizer.pad_token] * model_inputs['input_ids'].size(0)
                 decoder_input = self.tokenizer(decoder_start_token, return_tensors="pt").input_ids
                 model_inputs['decoder_input_ids'] = decoder_input
+            with torch.no_grad():
+                if hasattr(self.model, 'adaHooks'):
+                    self.model.adaHooks[1].reset()
+                    self.model(**model_inputs)
+                    self.model.adaHooks[1].isRecord = False
             outputs =  self.model(**model_inputs, output_hidden_states=True)
         hidden_states = self._get_hidden_states(outputs, rep_token, hidden_layers, which_hidden_states)
         

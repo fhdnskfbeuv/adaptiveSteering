@@ -30,7 +30,11 @@ def get_mean_activations(model, tokenizer, instructions, tokenize_instructions_f
 
     for i in tqdm(range(0, len(instructions), batch_size)):
         inputs = tokenize_instructions_fn(instructions=instructions[i:i+batch_size])
-
+        with torch.no_grad():
+            if hasattr(model, 'adaHooks'):
+                model.adaHooks[1].reset()
+                model(**(inputs.to(model.device)))
+                model.adaHooks[1].isRecord = False
         with add_hooks(module_forward_pre_hooks=fwd_pre_hooks, module_forward_hooks=[]):
             model(
                 input_ids=inputs.input_ids.to(model.device),

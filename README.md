@@ -7,8 +7,7 @@ Run the command below to install conda environment first:
 conda create -n your_env_name python=3.11
 conda activate your_env_name
 pip install -r requirements.txt
-cd ./strong_reject
-pip install -e .
+pip install git+https://github.com/dsbowen/strong_reject.git@main
 ```
 
 Then, copy and paste files in ```forTransformerLens``` to ```Your_Anaconda_Path/envs/as/lib/python3.11/site-packages/transformer_lens/```, 

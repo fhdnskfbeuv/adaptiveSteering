@@ -19,6 +19,10 @@ class ModelExtraction(ModelBase):
             input_ids = self.tokenizer.apply_chat_template(txt, add_generation_prompt=True, return_tensors="pt").to(self.device)
 
             with torch.no_grad():
+                if hasattr(self.model, 'adaHooks'):
+                    self.model.adaHooks[1].reset()
+                    self.model(**input_ids, output_hidden_states=True)
+                    self.model.adaHooks[1].isRecord = False
                 outputs = self.model(input_ids, output_hidden_states=True)
 
             hidden_states = outputs.hidden_states

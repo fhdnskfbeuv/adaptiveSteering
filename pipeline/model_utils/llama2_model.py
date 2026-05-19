@@ -11,7 +11,6 @@ from pipeline.utils.utils import get_orthogonalized_matrix
 from pipeline.model_utils.model_base import ModelBase
 
 # Llama 2 chat templates are based on
-# - https://github.com/centerforaisafety/HarmBench/blob/main/baselines/model_utils.py
 
 LLAMA2_DEFAULT_SYSTEM_PROMPT = """You are a helpful, respectful and honest assistant. Always answer as helpfully as possible, while being safe. Your answers should not include any harmful, unethical, racist, sexist, toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and positive in nature.
 
@@ -108,7 +107,6 @@ class Llama2Model(ModelBase):
             use_fast=False
         )
 
-        # From: https://github.com/nrimsky/CAA/blob/main/generate_vectors.py
         tokenizer.pad_token = tokenizer.eos_token
         tokenizer.padding_side = "left"
 

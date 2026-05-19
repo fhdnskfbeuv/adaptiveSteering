@@ -11,8 +11,6 @@ from pipeline.utils.utils import get_orthogonalized_matrix
 from pipeline.model_utils.model_base import ModelBase
 
 # Yi chat templates are based on
-# - Official tokenizer config: https://huggingface.co/01-ai/Yi-6B-Chat/blob/main/tokenizer_config.json
-# - Replicate default prompt template: https://replicate.com/01-ai/yi-6b-chat
 
 SAMPLE_SYSTEM_PROMPT = """You are a helpful assistant."""
 

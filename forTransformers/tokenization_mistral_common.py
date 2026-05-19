@@ -4,7 +4,6 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -167,7 +166,6 @@ class MistralCommonTokenizer(PushToHubMixin):
 
     Otherwise the tokenizer falls back to the Transformers implementation of the tokenizer.
 
-    For more info on `mistral-common`, see [mistral-common](https://github.com/mistralai/mistral-common).
 
     This class is a wrapper around a `mistral_common.tokens.tokenizers.mistral.MistralTokenizer`.
     It provides a Hugging Face compatible interface to tokenize using the official mistral-common tokenizer.
@@ -196,9 +194,7 @@ class MistralCommonTokenizer(PushToHubMixin):
     - Pair of sequences are not supported. The signature have been kept for compatibility but all arguments related to pair of sequences are ignored. The return values of pairs are returned as `None`.
     - The `is_split_into_words` argument is not supported.
     - The `return_token_type_ids` argument is not supported.
-    - It is not possible to add new tokens to the tokenizer. Also the special tokens are handled differently from Transformers. In `mistral-common`, special tokens are never encoded directly. This means that: `tokenizer.encode("<s>")` will not return the ID of the `<s>` token. Instead, it will return a list of IDs corresponding to the tokenization of the string `"<s>"`. For more information, see the [mistral-common documentation](https://mistralai.github.io/mistral-common/usage/tokenizers/#special-tokens).
 
-    If you have suggestions to improve this class, please open an issue on the [mistral-common GitHub repository](https://github.com/mistralai/mistral-common/issues) if it is related to the tokenizer or on the [Transformers GitHub repository](https://github.com/huggingface/transformers/issues) if it is related to the Hugging Face interface.
     """
 
     model_input_names: list[str] = ["input_ids", "attention_mask"]
@@ -1389,7 +1385,6 @@ class MistralCommonTokenizer(PushToHubMixin):
                 A list of tools (callable functions) that will be accessible to the model. If the template does not
                 support function calling, this argument will have no effect. Each tool should be passed as a JSON Schema,
                 giving the name, description and argument types for the tool. See our
-                [chat templating guide](https://huggingface.co/docs/transformers/main/en/chat_templating#automated-function-conversion-for-tool-use)
                 for more information.
             continue_final_message (bool, *optional*):
                 If this is set, the chat will be formatted so that the final
@@ -1726,7 +1721,6 @@ class MistralCommonTokenizer(PushToHubMixin):
                 Whether or not to force the (re-)download the vocabulary files and override the cached versions if they
                 exist.
             token (`str` or *bool*, *optional*):
-                The token to use as HTTP bearer authorization for remote files. If `True`, will use the token generated
                 when running `hf auth login` (stored in `~/.huggingface`).
             local_files_only (`bool`, *optional*, defaults to `False`):
                 Whether or not to only rely on local files and not to attempt to download any files.

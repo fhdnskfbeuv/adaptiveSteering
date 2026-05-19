@@ -1,4 +1,3 @@
-from .llm_config import cfg
 
 from sklearn.linear_model import LogisticRegression as skLR
 
@@ -20,7 +19,6 @@ class LayerClassifier:
 			self.linear = LogisticRegression(solver="qn", max_iter=max_iter,
 											 # class_weight='balanced',
 											 output_type='numpy', penalty=pType, C=C, fit_intercept=True)
-			self.linear.solver_model.warm_start = True
 			self.linear.verbose = 0
 		else:
 			self.linear = skLR(solver="saga", max_iter=max_iter,

@@ -11,7 +11,6 @@ from pipeline.utils.utils import get_orthogonalized_matrix
 from pipeline.model_utils.model_base import ModelBase
 
 # Llama 3 chat templates are based on
-# - https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3/
 # <|begin_of_text|> is automatically added by the tokenizer
 
 LLAMA3_CHAT_TEMPLATE = """<|start_header_id|>user<|end_header_id|>

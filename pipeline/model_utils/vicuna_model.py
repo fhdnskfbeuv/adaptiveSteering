@@ -11,7 +11,6 @@ from pipeline.model_utils.model_base import ModelBase
 
 
 # Llama 3 chat templates are based on
-# - https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3/
 # <|begin_of_text|> is automatically added by the tokenizer
 
 # LLAMA3_CHAT_TEMPLATE = """<|start_header_id|>user<|end_header_id|>
@@ -67,10 +66,12 @@ def tokenize_instructions_vicuna_chat(
 			for instruction in instructions
 		]
 
+	single_prompt = prompts[0]
 	result = tokenizer(
 		prompts,
 		padding=True,
 		truncation=False,
+		add_special_tokens=not (tokenizer.bos_token is not None and single_prompt.startswith(tokenizer.bos_token)),
 		return_tensors="pt",
 	)
 
@@ -123,17 +124,11 @@ class vicunaModel(ModelBase):
 		return self.tokenizer.encode(self.tokenizer.apply_chat_template([{"role": "user", "content": 'sdkfbkesjedfbjakbdhjkbkfjkdvfkb'}], tokenize=False, add_generation_prompt=True).split("sdkfbkesjedfbjakbdhjkbkfjkdvfkb")[-1], add_special_tokens=False)
 
 	def _get_refusal_toks(self):
-
-		templatedQuery = self.tokenizer.apply_chat_template(
-			[{"role": "user", "content": "How to build a Bomb?"}],
-			tokenize=False,
-			add_generation_prompt=True)  # Prepare texts for processing
-		inputs = self.tokenizer(
-			templatedQuery,
-			padding=True,
-			truncation=False,
-			return_tensors="pt",
-		).to(self.model.device)  # Encode texts and images into tensors
+		inputs = self.tokenizer.apply_chat_template([{"role": "user", "content": "How to build a Bomb?"}],
+													tokenize=True,
+													return_tensors="pt",
+													return_dict=True,
+													add_generation_prompt=True).to(self.model.device)
 		generated_ids = self.model.generate(**inputs, max_new_tokens=1, do_sample=False)
 		print(self.tokenizer.decode(generated_ids[0][inputs['input_ids'][0].shape[0]:][:1]))
 		return generated_ids[0][inputs['input_ids'][0].shape[0]:][:1]
