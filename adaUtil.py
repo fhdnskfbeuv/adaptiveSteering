@@ -8,9 +8,9 @@ import numpy as np
 from peft import PeftModel
 
 adaPath = {
-	"llama": './AdaSteer/vectors/llama31-8b-instruct',
-	"gemma": './AdaSteer/vectors/gemma2-9b-it',
-	"qwen": './AdaSteer/vectors/qwen25-7b-instruct',
+	"llama": './vectors/llama31-8b-instruct',
+	"gemma": './vectors/gemma2-9b-it',
+	"qwen": './vectors/qwen25-7b-instruct',
 }
 
 
