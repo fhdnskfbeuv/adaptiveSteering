@@ -170,6 +170,6 @@ CUDA_VISIBLE_DEVICES="4" python evalMy.py --evalData harm --model 'adasteer/Qwen
 
 ```
 
-To attack AdaSteer with baselines, run commands in ```adaSteerBaseline.sh```
+To attack AdaSteer with baselines, run commands in ```adaSteerBaseline.sh```.
 
 
