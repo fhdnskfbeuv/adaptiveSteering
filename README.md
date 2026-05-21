@@ -2,7 +2,7 @@
 
 ## Rant
 
-Current peer review of the AI community is a colosseum. To survive in the colosseum, we have to include many baselines in our code for reviewers, facilitating them, a bunch of slaveholder, to hold gladiatorial games if they want to. This situation makes our code ugly.
+Current peer review of the AI community is a colosseum. To survive in the colosseum, we have to include many baselines in our code for reviewers, facilitating them to hold gladiatorial games if they want to. This situation makes our code ugly.
 
 If you want to hold a gladiatorial game (i.e., reproducing results presented in our paper), this repository is suitable. Yet, if you want to try or modify our method, try cleaner codes at https://github.com/fhdnskfbeuv/AdaptiveProbeSteering
 
